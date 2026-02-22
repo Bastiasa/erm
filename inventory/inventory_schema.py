@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import date
 
 
 class InventoryBase(BaseModel):
@@ -20,3 +21,9 @@ class ItemRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class InvLog(BaseModel):
+    inventory_id: int
+    user_id: int
+    action: str 
+    timestamp: date

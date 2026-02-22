@@ -1,12 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from core.dependencies import CreateSession
 from inventory.inventory_model import Inventory, InventoryLogs
 from inventory.inventory_schema import ItemCreate
 from users.users_model import User
-from core.security import verify_token, create_token
+from core.security import verify_token
+from datetime import datetime
 
-def edit_inventory_item(item_name: str, item_update: ItemCreate, session: Session = Depends(CreateSession)):
+def edit_inventory_item(item_name: str, item_update: ItemCreate, user: User, session: Session = Depends(CreateSession)):
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="User not authenticated")
     
     item = session.query(Inventory).filter(Inventory.item_name == item_name).first()
 
@@ -16,7 +20,7 @@ def edit_inventory_item(item_name: str, item_update: ItemCreate, session: Sessio
     item.item_name = item_update.item_name
     item.description = item_update.description
     item.quantity = item_update.quantity
-    item.owner_id = item_update.owner_id
+    item.owner_id = item.owner_id
 
     session.commit()
     session.refresh(item)
@@ -26,12 +30,22 @@ def edit_inventory_item(item_name: str, item_update: ItemCreate, session: Sessio
         "item": item,
     }
 
-def delete_inventory_item(item_name: str, session: Session = Depends(CreateSession)):
+def delete_inventory_item(item_name: str, user: User, session: Session = Depends(CreateSession)): 
     
+    if not user:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="User not authenticated")
+
     item_to_delete = session.query(Inventory).filter(Inventory.item_name == item_name).first()
 
     if not item_to_delete:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inventory item not found")
+
+    log = InventoryLogs(
+        inventory_id = item_to_delete.id,
+        user_id = user.id,
+        item_name = item_name,
+        action = 'Delete',
+    )
 
     session.delete(item_to_delete)
     session.commit()
@@ -40,34 +54,3 @@ def delete_inventory_item(item_name: str, session: Session = Depends(CreateSessi
         "message": "Inventory item deleted successfully",
         "item": item_to_delete
     }
-
-def change_inventory_quantity(
-    inventory_id: int,
-    quantity_delta: int,
-    action: str,
-    session: Session,
-    user: User
-):
-    item = session.query(Inventory).filter(Inventory.id == inventory_id).first()
-
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    new_quantity = item.quantity + quantity_delta
-
-    if new_quantity < 0:
-        raise HTTPException(status_code=400, detail="Not enough stock")
-
-    # Actualiza stock
-    item.quantity = new_quantity
-
-    # Crea log
-    log = InventoryLogs(
-        inventory_id=item.id,
-        user_id=user.id,
-        action=action,
-        quantity_changed=quantity_delta
-    )
-
-    session.add(log)
-    session.commit()
