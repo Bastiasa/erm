@@ -2,7 +2,6 @@ from sqlalchemy import Integer, String, Column, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from core.database import base
 from datetime import datetime
-from users.users_model import User
 
 
 class Inventory(base):
@@ -12,8 +11,8 @@ class Inventory(base):
     item_name = Column(String, index=True, nullable=False)
     description = Column(String, nullable=False)
     quantity = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="inventory_items")
     logs = relationship("InventoryLogs", back_populates="inventory")
@@ -26,6 +25,6 @@ class InventoryLogs(base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     action = Column(String, nullable=False)
     quantity_changed = Column(Integer, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    timestamp = Column(DateTime, default=datetime.now(), nullable=False)
     inventory = relationship("Inventory", back_populates="logs")
     user = relationship("User", back_populates="inventory_logs")

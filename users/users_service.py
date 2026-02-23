@@ -21,7 +21,7 @@ def authuser(identifier: str, password: str, db: Session):
 
 async def generate_and_send_verification_code(user: User, db: Session):
     code = str(random.randint(100000, 999999))
-    expires_at = datetime.utcnow() + timedelta(minutes=VERIFICATION_TOKEN_EXPIRE_MINUTES)
+    expires_at = datetime.now() + timedelta(minutes=VERIFICATION_TOKEN_EXPIRE_MINUTES)
     user.verification_code = code
     user.verification_code_expires_at = expires_at
     db.add(user)
@@ -33,7 +33,7 @@ async def generate_and_send_verification_code(user: User, db: Session):
 def verify_user_email(user: User, code: str, db: Session):
     if not user.verification_code or user.verification_code != code:
         return False
-    if user.verification_code_expires_at < datetime.utcnow():
+    if user.verification_code_expires_at < datetime.now():
         return False
     user.is_verified = 1
     user.verification_code = None

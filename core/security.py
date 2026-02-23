@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, Request
 from jose import jwt, JWTError
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from sqlalchemy.orm import sessionmaker, Session
 from users.users_model import User
@@ -17,7 +17,7 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl="/home/login")
 
 def create_token(user_id: int):
 
-    expiration = datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    expiration = datetime.now() + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode = {
         "exp": expiration, 
         "sub": str(user_id)
@@ -28,7 +28,7 @@ def create_token(user_id: int):
 
 
 def create_refresh_token(user_id: int):
-    expiration = datetime.now(timezone.utc) + timedelta(minutes=int(REFRESH_TOKEN_EXPIRE_MINUTES))
+    expiration = datetime.now() + timedelta(minutes=int(REFRESH_TOKEN_EXPIRE_MINUTES))
     to_encode = {
         "exp": expiration,
         "sub": str(user_id)
@@ -66,9 +66,9 @@ def create_verification_token(email: str) -> str:
     to_encode = {"sub": email}
     expires_delta = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
