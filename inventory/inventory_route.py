@@ -6,26 +6,15 @@ from inventory.inventory_model import Inventory
 from inventory.inventory_schema import ItemCreate
 from users.users_model import User
 from core.security import verify_token
-from inventory.inventory_service import edit_inventory_item, delete_inventory_item
+from inventory.inventory_service import edit_inventory_item, delete_inventory_item, create_inventory_item
 from core.dependencies import templates
 
 inventory_router = APIRouter(prefix="/inv", tags=["inv"])
     
 
 @inventory_router.post("/add")
-def create_inventory_item(item_name: str = Form(...), description: str = Form(...), quantity: int = Form(...), session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
-    
-    new_item = Inventory(
-        item_name=item_name,
-        description=description,
-        quantity=quantity,
-        owner_id=user.id
-    )
-
-    session.add(new_item)
-    session.commit()
-    session.refresh(new_item)
-
+def create_inventory_item_route(item_name: str = Form(...), description: str = Form(...), quantity: int = Form(...), session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
+    create_inventory_item(item_name, description, quantity, session, user)
     return RedirectResponse(url="/inv/dashboard", status_code=303)
 
 
@@ -39,6 +28,7 @@ def update_inventory_item(item_name: str, item_update: ItemCreate, user: User = 
 def delete_inventory_item_route(item_name: str, session: Session = Depends(CreateSession)):
     delete_inventory_item(item_name, session)
     return RedirectResponse(url="/inv/dashboard", status_code=303)
+
 
 @inventory_router.get("/dashboard")
 def inventory_dashboard(request: Request, search: str = None, session: Session = Depends(CreateSession), user: User = Depends(verify_token)

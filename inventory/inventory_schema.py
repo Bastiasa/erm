@@ -1,6 +1,11 @@
 from pydantic import BaseModel, Field
 from datetime import date
+from enum import Enum
 
+class action(str, Enum):
+    Delete = "Delete"
+    Reduce = "Reduce"
+    Add = "Add"
 
 class InventoryBase(BaseModel):
     item_name: str
@@ -25,5 +30,8 @@ class ItemRead(BaseModel):
 class InvLog(BaseModel):
     inventory_id: int
     user_id: int
-    action: str 
+    action: action
     timestamp: date
+
+    class Config:
+        from_attributes = True
