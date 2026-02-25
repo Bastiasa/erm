@@ -5,4 +5,4 @@
 5. add add and remove endpoints in inventory ........ NO GOOD IDEA
 6. save inventory & log in db automaticly ........ 
 7. diferent db between 2 users
-8. resend verification code dont work (idk why)
+8. resend verification code dont work (idk why) ....... DONE

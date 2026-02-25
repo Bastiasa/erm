@@ -21,7 +21,7 @@ def _create_inventory_log(session: Session, inventory_item: Inventory, user: Use
         inventory_id=inventory_item.id,
         user_id=user.id,
         action=action,
-        timestamp=datetime.now(),
+        timestamp=datetime.utcnow(),
         quantity_before=quantity_before,
         quantity_after=quantity_after
     )
@@ -134,7 +134,7 @@ def create_inventory_log_endpoint(inv_log_data: InvLogSchema, user: User = Depen
         inventory_id=inv_log_data.inventory_id,
         user_id=user.id,
         action=inv_log_data.action,
-        timestamp=datetime.now(),
+        timestamp=datetime.utcnow(),
         quantity_before=inv_log_data.quantity_before,
         quantity_after=inv_log_data.quantity_after
     )

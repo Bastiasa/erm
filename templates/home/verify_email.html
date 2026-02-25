@@ -25,12 +25,10 @@
             {% endif %}
         {% endif %}
 
-        <!-- Info Text -->
         <div class="info-text">
             Se ha enviado un código de verificación a tu email: <strong>{{ email }}</strong>
         </div>
 
-        <!-- Formulario para ingresar el código de verificación -->
         <form action="/home/verify-email" method="post">
             <div class="form-group">
                 <label for="code">Código de Verificación:</label>

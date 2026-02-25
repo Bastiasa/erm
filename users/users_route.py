@@ -64,6 +64,7 @@ async def create_user(request: Request, session: Session = Depends(CreateSession
                 "request": request})
             
         password = bcrypt_context.hash(password)
+
         new_user = User(
             username=username,
             email=email,
@@ -76,13 +77,15 @@ async def create_user(request: Request, session: Session = Depends(CreateSession
 
         await generate_and_send_verification_code(new_user, session)
 
+        user_email = new_user.email
+
         verification_jwt = create_verification_token(new_user.email)
 
         return templates.TemplateResponse("home/verify_email.html", {
-            "request": request, 
-            "email": new_user.email, # Opcional, puedes usar solo el JWT
-            "verification_jwt": verification_jwt, # ¡Pasamos el JWT a la plantilla!
-            "message": "A verification code has been sent to your email."
+            "request": request,
+            "verification_jwt": verification_jwt,
+            "message": "A verification code has been sent to your email.",
+            "user_email": user_email
         })
     
     except Exception as e:
@@ -109,39 +112,47 @@ def verify_email_page(request: Request):
 
 
 @home_router.post("/verify-email")
-async def verify_email(
-    request: Request,
-    session: Session = Depends(CreateSession),
-    code: str = Form(...),
-    verification_jwt: str = Form(...) # Recibimos el JWT aquí también
-):
+async def verify_email(request: Request,session: Session = Depends(CreateSession), code: str = Form(...), verification_jwt: str = Form(...)):
+
     email = verify_verification_token(verification_jwt)
+
     if not email:
-        return templates.TemplateResponse("home/verify_email.html", {"request": request, "message": "Invalid or expired verification link."})
+        return templates.TemplateResponse("home/verify_email.html", {
+            "request": request, 
+            "message": "Token inválido o expirado.",
+            "verification_jwt": verification_jwt 
+        })
 
     user = session.query(User).filter(User.email == email).first()
     if not user:
-        return templates.TemplateResponse("home/verify_email.html", {"request": request, "message": "User not found."})
+        return templates.TemplateResponse("home/verify_email.html", {
+            "request": request, 
+            "message": "Usuario no encontrado.",
+            "verification_jwt": verification_jwt
+        })
     
     if verify_user_email(user, code, session):
         return RedirectResponse(url="/home/login", status_code=status.HTTP_303_SEE_OTHER)
-    else:
-        return templates.TemplateResponse("home/verify_email.html", {"request": request, "email": email, "verification_jwt": verification_jwt, "message": "Invalid or expired verification code."})
+    else:\
+        return templates.TemplateResponse("home/verify_email.html", {
+            "request": request, 
+            "email": email, 
+            "verification_jwt": verification_jwt,
+            "message": "Código inválido o expirado."
+        })
 
 
 @home_router.post("/resend-verification-email")
 async def resend_verification_email(request: Request, session: Session = Depends(CreateSession), verification_jwt: str = Form(...)):
     email = verify_verification_token(verification_jwt)
     if not email:
-        # Token inválido o expirado
-        return templates.TemplateResponse("home/verify_email.html", {
+        return templates.TemplateResponse("home/login_email.html", {
             "request": request, 
             "message": "Invalid or expired verification link. Please try logging in again."
         })
 
     user = session.query(User).filter(User.email == email).first()
     if not user:
-        # Usuario no encontrado (raro si el token es válido, pero buena práctica)
         return templates.TemplateResponse("home/verify_email.html", {
             "request": request, 
             "message": "User not found. Please register or log in."
