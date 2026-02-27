@@ -1,103 +1,98 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Inventario</title>
-    <link rel="stylesheet" href="/static/inv/dashboard.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" href="/static/inv/dashboard.css?v=999">
 </head>
+
 <body>
 
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="app-icon">🏋️</div>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
 
-<header class="topbar">
-    <div class="left">
-        <h2>📦 Inventario</h2>
-    </div>
+        <nav class="sidebar-nav">
+            <a class="nav-item active" href="/inv/dashboard">
+                <span class="icon">📊</span>
+                <span class="label">Dashboard</span>
+            </a>
 
+            <a class="nav-item" href="/production">
+                <span class="icon">🏭</span>
+                <span class="label">Production</span>
+            </a>
 
-    <div class="right">
-        <span>Usuario: {{ user.username }}</span>
-        <a href="/home/login" class="logout-btn">Cerrar sesión</a>
-    </div>
-</header>
+            <a class="nav-item" href="/home/contacts">
+                <span class="icon">👥</span>
+                <span class="label">Contacts</span>
+            </a>
 
+            <a class="nav-item">
+                <span class="icon">📁</span>
+                <span class="label">Projects</span>
+            </a>
+        </nav>
 
+        <div class="sidebar-footer">
+            <a class="logout-link">🚪 Sign Out</a>
+        </div>
+    </aside>
 
-<section class="controls">
+    <main class="main-content">
+        <header class="header-top">
+            <div class="page-title">
+                <h1>Inventory</h1>
+                <p>Manage your materials and stock levels</p>
+            </div>
+        </header>
 
+        <section class="controls">
+            <form class="search-form">
+                <input type="text" placeholder="Search materials...">
+                <button><img src="https://cdn-icons-png.flaticon.com/512/11741/11741045.png"></button>
+            </form>
 
-    <form method="get" action="/inv/dashboard" class="search-form">
-        <input type="text" name="search" placeholder="Buscar material...">
-        <button type="submit">Buscar</button>
-    </form>
+            <button class="primary-btn" id="add-material-btn">➕ Add Material</button>
 
+            <form method="post" action="/inv/add" class="add-material-form hidden">
+                <input type="text" name="item_name" placeholder="Nombre" required>
+                <input type="text" name="description" placeholder="Descripción" required>
+                <input type="number" name="quantity" placeholder="Cantidad inicial" required>
+                <button type="submit">Guardar</button>
+            </form>
+        </section>
 
-    <button onclick="toggleAddForm()" class="primary-btn">
-        + Agregar Material
-    </button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Material</th>
+                    <th>Description</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </main>
 
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
 
-</section>
+        const addBtn = document.getElementById('add-material-btn');
+        const addForm = document.querySelector('.add-material-form');
 
-
-
-<section id="add-form" class="add-form hidden">
-    <form method="post" action="/inv/add">
-        <input type="text" name="item_name" placeholder="Nombre" required>
-        <input type="text" name="description" placeholder="Descripción" required>
-        <input type="number" name="quantity" placeholder="Cantidad inicial" required>
-        <button type="submit">Guardar</button>
-    </form>
-</section>
-
-
-
-<section class="table-section">
-    <table>
-        <thead>
-            <tr>
-                <th>Material</th>
-                <th>Descripción</th>
-                <th>Stock</th>
-                <th>Última actualización</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.item_name }}</td>
-                <td>{{ item.description }}</td>
-                <td class="stock">{{ item.quantity }}</td>
-                <td>{{ item.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                <td class="actions">
-
-                    <!-- EDITAR -->
-                    <form method="post" action="/inv/edit/{{ item.item_name }}">
-                        <button class="edit-btn">Edit</button>
-                    </form>
-
-                    <!-- ELIMINAR -->
-                    <form method="post" action="/inv/delete/{{ item.item_name }}">
-                        <button class="delete-btn">Delete</button>
-                    </form>
-
-
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
-
-
-
-<script>
-function toggleAddForm() {
-    const form = document.getElementById("add-form");
-    form.classList.toggle("hidden");
-}
-</script>
-
+        addBtn.addEventListener('click', () => {
+            addForm.classList.toggle('hidden');
+        });
+    </script>
 
 </body>
 </html>

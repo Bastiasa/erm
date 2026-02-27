@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from users.users_model import User
 from core.security import bcrypt_context
 import random
 from datetime import datetime, timedelta
 from core.email_service import send_verification_email
 from core.config import VERIFICATION_TOKEN_EXPIRE_MINUTES
+from users.users_model import Contacts
 
 def authuser(identifier: str, password: str, db: Session):
     """Busca usuario por username O email, y verifica contraseña."""
@@ -42,3 +44,21 @@ def verify_user_email(user: User, code: str, db: Session):
     db.commit()
     db.refresh(user)
     return True
+
+def build_query(session: Session, q: str | None, contact_type: str | None):
+    query = session.query(Contacts)
+
+    if q:
+        query = query.filter(
+            or_(
+                Contacts.name.ilike(f"%{q}%"),
+                Contacts.email.ilike(f"%{q}%"),
+                Contacts.phone.ilike(f"%{q}%"),
+                Contacts.contact_type.ilike(f"%{q}%")
+            )
+        )
+
+    if contact_type:
+        query = query.filter(Contacts.contact_type == contact_type)
+
+    return query.order_by(Contacts.created_at.desc())

@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from users.users_model import User
+from sqlalchemy import or_
+from users.users_model import User, Contacts
 from core.security import bcrypt_context, verify_token
 from core.dependencies import CreateSession
 from core.security import create_token, create_verification_token, verify_verification_token
 from fastapi.security import OAuth2PasswordRequestForm
-from users.users_service import authuser, generate_and_send_verification_code, verify_user_email
+from users.users_service import authuser, generate_and_send_verification_code, verify_user_email, build_query
 from core.dependencies import templates
 
 home_router = APIRouter(prefix="/home", tags=["home"])
@@ -91,6 +92,32 @@ async def create_user(request: Request, session: Session = Depends(CreateSession
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=401, detail=f"Error creating user: {str(e)}")
+    
+@home_router.post("/contacts")
+def create_contact(
+    name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    contact_type: str = Form(...),
+    address: str = Form(...),
+    session: Session = Depends(CreateSession)
+):
+    contact = Contacts(
+        name=name,
+        email=email,
+        phone=phone,
+        contact_type=contact_type,
+        address=address
+    )
+
+    session.add(contact)
+    session.commit()
+
+    return RedirectResponse(url="/home/contacts", status_code=303)
+
+
+
+
 
 # VIEWS
 @home_router.get("/login")
@@ -159,17 +186,35 @@ async def resend_verification_email(request: Request, session: Session = Depends
         })
     
     if user.is_verified:
-        # Si el usuario ya está verificado, redirigir a la página de login o dashboard
+
         return RedirectResponse(url="/home/login", status_code=status.HTTP_303_SEE_OTHER)
 
     await generate_and_send_verification_code(user, session)
     
-    # Opcional: Regenerar un nuevo JWT para el reenvío, si se permite múltiples reenvíos
     new_verification_jwt = create_verification_token(user.email)
 
     return templates.TemplateResponse("home/verify_email.html", {
         "request": request, 
-        "email": user.email, # Puedes mantener el email para mostrarlo al usuario
-        "verification_jwt": new_verification_jwt, # Pasamos el nuevo JWT
+        "email": user.email,
+        "verification_jwt": new_verification_jwt,
         "message": "A new verification code has been sent to your email."
     })
+
+@home_router.get("/contacts")
+def get_contacts(
+    request: Request,
+    q: str | None = None,
+    contact_type: str | None = None,
+    session: Session = Depends(CreateSession)
+):
+    contacts = build_query(session, q, contact_type).all()
+
+    return templates.TemplateResponse(
+        "contacts/contacts.html",
+        {
+            "request": request,
+            "contacts": contacts,
+            "q": q,
+            "contact_type": contact_type
+        }
+    )

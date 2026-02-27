@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contactos</title>
+    <link rel="stylesheet" href="/static/contacts/contacts.css">
+</head>
+<body>
+
+<h1>📇 Contactos</h1>
+
+<form method="get">
+    <input
+        type="text"
+        name="q"
+        placeholder="Buscar por nombre, email o teléfono"
+        value="{{ q or '' }}"
+    >
+
+    <select name="contact_type">
+        <option value="">Todos</option>
+        <option value="cliente" {% if contact_type == "cliente" %}selected{% endif %}>
+            Cliente
+        </option>
+        <option value="arquitecto" {% if contact_type == "arquitecto" %}selected{% endif %}>
+            Arquitecto
+        </option>
+    </select>
+
+    <button type="submit">Buscar</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Cargo</th>
+            <th>Dirección</th>
+            <th>Creado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if contacts %}
+            {% for c in contacts %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ email }}</td>
+                <td>{{ phone }}</td>
+                <td>
+                    <span class="badge {{ c.contact_type }}">
+                        {{ c.contact_type.capitalize() }}
+                    </span>
+                </td>
+                <td>{{ c.address }}</td>
+                <td>{{ c.created_at.strftime("%d/%m/%Y") }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="6" class="empty">
+                    No se encontraron contactos
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+</body>
+</html>
