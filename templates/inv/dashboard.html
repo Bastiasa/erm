@@ -52,9 +52,10 @@
         </header>
 
         <section class="controls">
-            <form class="search-form">
-                <input type="text" placeholder="Search materials...">
-                <button>🔍</button>
+            <form class="search-form" method="get" action="/inv/dashboard">
+                <input type="text" name="search" placeholder="Search materials..."
+                    value="{{ request.query_params.get('search', '') }}">
+                <button type="submit">🔍</button>
             </form>
 
             <button class="primary-btn" id="add-material-btn">➕ Add Material</button>
@@ -70,13 +71,28 @@
         <table>
             <thead>
                 <tr>
+                    <th>ID Owner</th>
                     <th>Material</th>
                     <th>Description</th>
                     <th>Stock</th>
                     <th>Actions</th>
+                    <th>Updated Date</th>
                 </tr>
             </thead>
             <tbody>
+                {% for item in items %}
+                <tr data-item-id="{{ item.id }}">
+                    <td>{{ item.owner_id }}</td>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="actions">
+                        <button class="edit-btn" data-item-id="{{ item.id }}">✏️ Edit</button>
+                        <button class="delete-btn" data-item-id="{{ item.id }}">🗑️ Delete</button>
+                    </td>
+                    <td>{{ item.updated_at.strftime('%d/%m/%Y') if item.updated_at else '' }}</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </main>
@@ -91,6 +107,45 @@
 
         addBtn.addEventListener('click', () => {
             addForm.classList.toggle('hidden');
+        });
+
+        // DELETE
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const itemId = btn.dataset.itemId;
+                if (!confirm('Are you sure you want to delete this item?')) return;
+
+                await fetch(`/inv/delete/${itemId}`, { method: 'POST' });
+                location.reload();
+            });
+        });
+
+        // EDIT inline
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const row = btn.closest('tr');
+                const itemId = btn.dataset.itemId;
+
+                const name = row.children[1].innerText;
+                const desc = row.children[2].innerText;
+                const qty = row.children[3].innerText;
+
+                row.innerHTML = `
+                    <form class="edit-form" method="post" action="/inv/edit/${itemId}">
+                        <td>{{ user.id }}</td>
+                        <td><input type="text" name="item_name" value="${name}" required></td>
+                        <td><input type="text" name="description" value="${desc}" required></td>
+                        <td><input type="number" name="quantity" value="${qty}" required></td>
+                        <td class="actions">
+                            <button type="submit">Guardar</button>
+                            <button type="button" class="cancel-edit">❌ Cancel</button>
+                        </td>
+                        <td>${new Date().toLocaleDateString('es-ES')}</td>
+                    </form>
+                `;
+
+                row.querySelector('.cancel-edit').addEventListener('click', () => location.reload());
+            });
         });
     </script>
 
