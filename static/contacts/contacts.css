@@ -1,27 +1,210 @@
+/* --- VARIABLES Y CONFIGURACIÓN BASE --- */
+:root {
+    --bg-page: #f2f4f7;
+    --bg-main: #ffffff;
+    --border: #d0d7de;
+    --text-main: #1f2328;
+    --text-muted: #6e7781;
+    --blue: #1e40af;
+    --blue-hover: #1e3a8a;
+    --red: #dc2626;
+    --sidebar-width: 240px;
+    --sidebar-collapsed: 70px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f8;
-    padding: 20px;
-}
-
-h1 {
-    margin-bottom: 20px;
-}
-
-form {
+    background: var(--bg-page);
+    color: var(--text-main);
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    min-height: 100vh;
 }
 
-input,
-select,
-button {
+/* --- SIDEBAR DINÁMICO --- */
+.sidebar {
+    width: var(--sidebar-width);
+    background: #fff;
+    border-right: 1px solid var(--border);
+    position: fixed;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease; /* Transición suave para el ancho */
+    z-index: 1000;
+}
+
+/* ESTADO COLAPSADO: Reducimos el ancho físicamente */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed) !important;
+}
+
+/* Header: El botón ☰ se mueve del lado derecho al centro */
+.sidebar-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Abierto: Logo izquierda, Botón derecha */
+    padding: 0 15px;
+    transition: all 0.3s ease;
+}
+
+/* Cuando el sidebar está colapsado, centramos el botón */
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0;
+}
+
+.app-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+}
+
+/* Ocultamos el logo al colapsar */
+.sidebar.collapsed .app-icon {
+    display: none;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-muted);
     padding: 8px;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
-button {
+/* --- NAVEGACIÓN --- */
+.sidebar-nav {
+    padding: 10px 12px;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: #e7edff;
+    color: var(--blue);
+}
+
+.nav-item .icon {
+    width: 24px; 
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Ocultamos las etiquetas de texto al colapsar */
+.sidebar.collapsed .nav-item .label {
+    display: none;
+}
+
+/* --- FOOTER Y SIGN OUT --- */
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+}
+
+.logout-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--red);
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Ocultamos el texto de Sign Out al colapsar */
+.sidebar.collapsed .logout-link .label,
+.sidebar.collapsed .logout-link span:not(.icon) {
+    display: none;
+}
+
+.logout-link:hover {
+    background: #ffeeee;
+}
+
+/* --- CONTENIDO PRINCIPAL DINÁMICO --- */
+.main-content {
+    margin-left: var(--sidebar-width); /* Margen inicial */
+    padding: 40px;
+    flex: 1;
+    background: var(--bg-page);
+    transition: margin-left 0.3s ease; /* Transición suave para el margen */
+}
+
+/* Cuando el sidebar de al lado se colapsa, el margen disminuye */
+.sidebar.collapsed + .main-content {
+    margin-left: var(--sidebar-collapsed) !important;
+}
+
+/* --- ESTILOS DE TABLA Y CONTROLES --- */
+.header-top { margin-bottom: 32px; }
+.header-top h1 { font-size: 2rem; margin-bottom: 4px; }
+.header-top p { color: var(--text-muted); }
+
+.controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: center;
+}
+
+.search-form {
+    display: flex;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.search-form input {
+    flex: 1;
+    border: none;
+    padding: 12px;
+    outline: none;
+}
+
+.search-form button {
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
 }
 
@@ -29,40 +212,40 @@ table {
     width: 100%;
     border-collapse: collapse;
     background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
 }
 
-th,
-td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+th, td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
 }
 
 th {
-    background-color: #f0f0f0;
-    text-align: left;
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-tr:hover {
-    background-color: #fafafa;
-}
+tr:hover { background: #f1f5f9; }
 
-.badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
+.actions { display: flex; gap: 8px; }
+
+.edit-btn, .delete-btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
     color: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
-.cliente {
-    background-color: #007bff;
-}
+.edit-btn { background: var(--blue); }
+.delete-btn { background: var(--red); }
 
-.arquitecto {
-    background-color: #28a745;
-}
-
-.empty {
-    text-align: center;
-    padding: 20px;
-    color: #777;
-}
+.hidden { display: none; }

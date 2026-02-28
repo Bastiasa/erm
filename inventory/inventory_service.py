@@ -53,13 +53,6 @@ def delete_inventory_item(item_name: str, user: User, session: Session = Depends
     if not item_to_delete:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inventory item not found")
 
-    log = InventoryLogs(
-        inventory_id = item_to_delete.id,
-        user_id = user.id,
-        item_name = item_name,
-        action = 'Delete',
-    )
-
     session.delete(item_to_delete)
     session.commit()
 

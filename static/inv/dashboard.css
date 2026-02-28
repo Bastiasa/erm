@@ -1,15 +1,13 @@
+/* --- VARIABLES Y CONFIGURACIÓN BASE --- */
 :root {
     --bg-page: #f2f4f7;
     --bg-main: #ffffff;
     --border: #d0d7de;
     --text-main: #1f2328;
     --text-muted: #6e7781;
-
     --blue: #1e40af;
     --blue-hover: #1e3a8a;
     --red: #dc2626;
-    --red-hover: #b91c1c;
-
     --sidebar-width: 240px;
     --sidebar-collapsed: 70px;
 }
@@ -18,7 +16,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: system-ui, sans-serif;
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
 body {
@@ -28,7 +26,7 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* --- SIDEBAR DINÁMICO --- */
 .sidebar {
     width: var(--sidebar-width);
     background: #fff;
@@ -37,46 +35,58 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: width .3s ease;
+    transition: width 0.3s ease; /* Transición suave para el ancho */
+    z-index: 1000;
 }
 
+/* ESTADO COLAPSADO: Reducimos el ancho físicamente */
 .sidebar.collapsed {
-    width: var(--sidebar-collapsed);
+    width: var(--sidebar-collapsed) !important;
 }
 
-/* Header */
+/* Header: El botón ☰ se mueve del lado derecho al centro */
 .sidebar-header {
-    position: relative;
-    height: 60px;
+    height: 70px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between; /* Abierto: Logo izquierda, Botón derecha */
+    padding: 0 15px;
+    transition: all 0.3s ease;
 }
 
-/* App icon */
+/* Cuando el sidebar está colapsado, centramos el botón */
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0;
+}
+
 .app-icon {
     font-size: 24px;
+    display: flex;
+    align-items: center;
 }
 
+/* Ocultamos el logo al colapsar */
 .sidebar.collapsed .app-icon {
     display: none;
 }
 
-/* Toggle */
 .toggle-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
     background: none;
     border: none;
-    font-size: 18px;
+    font-size: 22px;
     cursor: pointer;
     color: var(--text-muted);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
-/* Nav */
+/* --- NAVEGACIÓN --- */
 .sidebar-nav {
-    padding: 16px 8px;
+    padding: 10px 12px;
     flex: 1;
 }
 
@@ -84,11 +94,12 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px;
+    padding: 12px 15px;
     color: var(--text-muted);
     text-decoration: none;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
 }
 
 .nav-item:hover,
@@ -97,68 +108,75 @@ body {
     color: var(--blue);
 }
 
-/* Icon */
 .nav-item .icon {
+    width: 24px; 
     font-size: 20px;
-    min-width: 24px;
-    display: inline-flex;
+    display: flex;
     justify-content: center;
 }
 
-/* Text */
-.nav-item .label {
-    transition: opacity .2s ease;
-}
-
+/* Ocultamos las etiquetas de texto al colapsar */
 .sidebar.collapsed .nav-item .label {
-    opacity: 0;
+    display: none;
 }
 
-/* Footer */
+/* --- FOOTER Y SIGN OUT --- */
 .sidebar-footer {
-    padding: 16px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
 }
 
 .logout-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     color: var(--red);
     text-decoration: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
 }
 
-/* Main */
+/* Ocultamos el texto de Sign Out al colapsar */
+.sidebar.collapsed .logout-link .label,
+.sidebar.collapsed .logout-link span:not(.icon) {
+    display: none;
+}
+
+.logout-link:hover {
+    background: #ffeeee;
+}
+
+/* --- CONTENIDO PRINCIPAL DINÁMICO --- */
 .main-content {
-    margin-left: var(--sidebar-width);
-    padding: 32px;
+    margin-left: var(--sidebar-width); /* Margen inicial */
+    padding: 40px;
     flex: 1;
-    background: var(--bg-main);
-    transition: margin-left .3s ease;
+    background: var(--bg-page);
+    transition: margin-left 0.3s ease; /* Transición suave para el margen */
 }
 
-.sidebar.collapsed+.main-content {
-    margin-left: var(--sidebar-collapsed);
+/* Cuando el sidebar de al lado se colapsa, el margen disminuye */
+.sidebar.collapsed + .main-content {
+    margin-left: var(--sidebar-collapsed) !important;
 }
 
-/* Header top */
-.header-top {
-    margin-bottom: 32px;
-}
+/* --- ESTILOS DE TABLA Y CONTROLES --- */
+.header-top { margin-bottom: 32px; }
+.header-top h1 { font-size: 2rem; margin-bottom: 4px; }
+.header-top p { color: var(--text-muted); }
 
-.page-title h1 {
-    font-size: 2rem;
-}
-
-.page-title p {
-    color: var(--text-muted);
-}
-
-/* Controls */
 .controls {
     display: flex;
     gap: 16px;
     margin-bottom: 24px;
+    align-items: center;
 }
 
 .search-form {
     display: flex;
+    background: white;
     border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
@@ -168,110 +186,66 @@ body {
 .search-form input {
     flex: 1;
     border: none;
-    padding: 10px;
+    padding: 12px;
+    outline: none;
 }
 
 .search-form button {
     background: var(--blue);
-    color: #fff;
+    color: white;
     border: none;
-    padding: 10px 16px;
-}
-
-/* Buttons */
-.primary-btn {
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
+    padding: 0 20px;
     cursor: pointer;
 }
 
-.primary-btn:hover {
-    background: var(--blue-hover);
-}
-
-.edit-btn {
+.primary-btn {
     background: var(--blue);
-    color: #fff;
+    color: white;
     border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.delete-btn {
-    background: var(--red);
-    color: #fff;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-}
-
-/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
 }
 
-th,
-td {
-    padding: 14px;
+th, td {
+    padding: 16px;
+    text-align: left;
     border-bottom: 1px solid var(--border);
 }
 
 th {
+    background: #f8fafc;
     color: var(--text-muted);
+    font-size: 0.75rem;
     text-transform: uppercase;
-    font-size: .75rem;
+    letter-spacing: 0.05em;
 }
 
-.actions {
-    display: flex;
-    gap: 8px;
-}
+tr:hover { background: #f1f5f9; }
 
-.add-material-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-main);
-    max-width: 400px;
-    transition: all 0.3s ease;
-}
+.actions { display: flex; gap: 8px; }
 
-.add-material-form input {
-    padding: 10px 12px;
-    border: 1px solid var(--border);
+.edit-btn, .delete-btn {
+    padding: 8px 14px;
     border-radius: 6px;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.add-material-form input:focus {
-    border-color: var(--blue);
-}
-
-.add-material-form button {
-    background: var(--blue);
-    color: #fff;
     border: none;
-    padding: 10px 12px;
-    border-radius: 6px;
+    color: white;
     cursor: pointer;
+    font-size: 0.85rem;
     font-weight: 500;
-    transition: background 0.2s;
 }
 
-.add-material-form button:hover {
-    background: var(--blue-hover);
-}
+.edit-btn { background: var(--blue); }
+.delete-btn { background: var(--red); }
 
-.add-material-form.hidden {
-    display: none;
-    margin-top: 12px;
-}
+.hidden { display: none; }
