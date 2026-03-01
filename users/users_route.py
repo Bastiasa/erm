@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
-from users.users_model import User, Contacts
+from users.users_model import User
 from core.security import bcrypt_context, verify_token
 from core.dependencies import CreateSession
 from core.security import create_token, create_verification_token, verify_verification_token
@@ -92,30 +91,6 @@ async def create_user(request: Request, session: Session = Depends(CreateSession
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=401, detail=f"Error creating user: {str(e)}")
-    
-@home_router.post("/contacts")
-def create_contact(
-    name: str = Form(...),
-    email: str = Form(...),
-    phone: str = Form(...),
-    contact_type: str = Form(...),
-    address: str = Form(...),
-    session: Session = Depends(CreateSession)
-):
-    contact = Contacts(
-        name=name,
-        email=email,
-        phone=phone,
-        contact_type=contact_type,
-        address=address
-    )
-
-    session.add(contact)
-    session.commit()
-
-    return RedirectResponse(url="/home/contacts", status_code=303)
-
-
 
 
 
@@ -199,22 +174,3 @@ async def resend_verification_email(request: Request, session: Session = Depends
         "verification_jwt": new_verification_jwt,
         "message": "A new verification code has been sent to your email."
     })
-
-@home_router.get("/contacts")
-def get_contacts(
-    request: Request,
-    q: str | None = None,
-    contact_type: str | None = None,
-    session: Session = Depends(CreateSession)
-):
-    contacts = build_query(session, q, contact_type).all()
-
-    return templates.TemplateResponse(
-        "contacts/contacts.html",
-        {
-            "request": request,
-            "contacts": contacts,
-            "q": q,
-            "contact_type": contact_type
-        }
-    )
