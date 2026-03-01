@@ -1,5 +1,5 @@
 from core.security import Session
-from contacs_models import Contacts
+from contacts.contacts_models import Contacts
 from sqlalchemy import or_
 
 def build_query(session: Session, q: str | None, contact_type: str | None):
