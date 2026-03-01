@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 from users.users_model import User
 from core.security import bcrypt_context
 import random

@@ -6,7 +6,7 @@ from core.security import bcrypt_context, verify_token
 from core.dependencies import CreateSession
 from core.security import create_token, create_verification_token, verify_verification_token
 from fastapi.security import OAuth2PasswordRequestForm
-from users.users_service import authuser, generate_and_send_verification_code, verify_user_email, build_query
+from users.users_service import authuser, generate_and_send_verification_code, verify_user_email
 from core.dependencies import templates
 
 home_router = APIRouter(prefix="/home", tags=["home"])
