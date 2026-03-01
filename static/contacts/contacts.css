@@ -249,4 +249,70 @@ tr:hover { background: #f1f5f9; }
 .delete-btn { background: var(--red); }
 
 .hidden { display: none; }
+/* =========================
+   CONTACTS FILTER FORM
+========================= */
+.main-content form {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin: 24px 0;
+}
 
+/* INPUT + SELECT */
+.main-content form input,
+.main-content form select {
+    min-width: 220px;
+    padding: 10px 4px;
+    font-size: 14px;
+    color: var(--text-main);
+
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+
+    transition: border-color 0.2s ease;
+}
+
+/* Placeholder */
+.main-content form input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Focus */
+.main-content form input:focus,
+.main-content form select:focus {
+    outline: none;
+    border-bottom-color: var(--blue);
+}
+
+/* SELECT limpio (sin estilos feos del browser) */
+.main-content form select {
+    appearance: none;
+    background-image: 
+        linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+    background-position:
+        calc(100% - 14px) 55%,
+        calc(100% - 8px) 55%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 28px;
+    cursor: pointer;
+}
+
+/* BOTÓN */
+.main-content form button {
+    padding: 10px 22px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.main-content form button:hover {
+    background: var(--blue-hover);
+}

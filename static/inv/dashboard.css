@@ -1,4 +1,6 @@
-/* --- VARIABLES Y CONFIGURACIÓN BASE --- */
+/* =========================================================
+   VARIABLES Y CONFIGURACIÓN BASE
+   ========================================================= */
 :root {
     --bg-page: #f2f4f7;
     --bg-main: #ffffff;
@@ -26,7 +28,9 @@ body {
     min-height: 100vh;
 }
 
-/* --- SIDEBAR DINÁMICO --- */
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 .sidebar {
     width: var(--sidebar-width);
     background: #fff;
@@ -35,26 +39,22 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: width 0.3s ease; /* Transición suave para el ancho */
+    transition: width 0.3s ease;
     z-index: 1000;
 }
 
-/* ESTADO COLAPSADO: Reducimos el ancho físicamente */
 .sidebar.collapsed {
-    width: var(--sidebar-collapsed) !important;
+    width: var(--sidebar-collapsed);
 }
 
-/* Header: El botón ☰ se mueve del lado derecho al centro */
 .sidebar-header {
     height: 70px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Abierto: Logo izquierda, Botón derecha */
+    justify-content: space-between;
     padding: 0 15px;
-    transition: all 0.3s ease;
 }
 
-/* Cuando el sidebar está colapsado, centramos el botón */
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
     padding: 0;
@@ -62,11 +62,8 @@ body {
 
 .app-icon {
     font-size: 24px;
-    display: flex;
-    align-items: center;
 }
 
-/* Ocultamos el logo al colapsar */
 .sidebar.collapsed .app-icon {
     display: none;
 }
@@ -78,13 +75,11 @@ body {
     cursor: pointer;
     color: var(--text-muted);
     padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
 }
 
-/* --- NAVEGACIÓN --- */
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
 .sidebar-nav {
     padding: 10px 12px;
     flex: 1;
@@ -109,22 +104,22 @@ body {
 }
 
 .nav-item .icon {
-    width: 24px; 
+    width: 24px;
     font-size: 20px;
     display: flex;
     justify-content: center;
 }
 
-/* Ocultamos las etiquetas de texto al colapsar */
 .sidebar.collapsed .nav-item .label {
     display: none;
 }
 
-/* --- FOOTER Y SIGN OUT --- */
+/* =========================================================
+   FOOTER
+   ========================================================= */
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid var(--border);
-    margin-top: auto;
 }
 
 .logout-link {
@@ -138,8 +133,6 @@ body {
     font-weight: 500;
 }
 
-/* Ocultamos el texto de Sign Out al colapsar */
-.sidebar.collapsed .logout-link .label,
 .sidebar.collapsed .logout-link span:not(.icon) {
     display: none;
 }
@@ -148,32 +141,62 @@ body {
     background: #ffeeee;
 }
 
-/* --- CONTENIDO PRINCIPAL DINÁMICO --- */
+/* =========================================================
+   CONTENIDO PRINCIPAL
+   ========================================================= */
 .main-content {
-    margin-left: var(--sidebar-width); /* Margen inicial */
+    margin-left: var(--sidebar-width);
     padding: 40px;
     flex: 1;
     background: var(--bg-page);
-    transition: margin-left 0.3s ease; /* Transición suave para el margen */
+    transition: margin-left 0.3s ease;
 }
 
-/* Cuando el sidebar de al lado se colapsa, el margen disminuye */
 .sidebar.collapsed + .main-content {
-    margin-left: var(--sidebar-collapsed) !important;
+    margin-left: var(--sidebar-collapsed);
 }
 
-/* --- ESTILOS DE TABLA Y CONTROLES --- */
-.header-top { margin-bottom: 32px; }
-.header-top h1 { font-size: 2rem; margin-bottom: 4px; }
-.header-top p { color: var(--text-muted); }
+/* =========================================================
+   HEADER
+   ========================================================= */
+.header-top {
+    margin-bottom: 32px;
+}
 
+.header-top h1 {
+    font-size: 2rem;
+    margin-bottom: 4px;
+}
+
+.header-top p {
+    color: var(--text-muted);
+}
+
+.top-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px;
+}
+
+.username {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
 .controls {
     display: flex;
     gap: 16px;
     margin-bottom: 24px;
     align-items: center;
+    position: relative; /* necesario para el form flotante */
 }
 
+/* =========================================================
+   SEARCH
+   ========================================================= */
 .search-form {
     display: flex;
     background: white;
@@ -198,6 +221,9 @@ body {
     cursor: pointer;
 }
 
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 .primary-btn {
     background: var(--blue);
     color: white;
@@ -208,6 +234,80 @@ body {
     cursor: pointer;
 }
 
+.primary-btn:hover {
+    background: var(--blue-hover);
+}
+
+/* =========================================================
+   ADD MATERIAL FORM (FLOATING)
+   ========================================================= */
+.add-material-form {
+    position: absolute;
+    top: 100%;
+    right: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    background: var(--bg-main);
+    padding: 16px 18px;
+    border-radius: 8px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+
+    z-index: 50;
+}
+
+.add-material-form.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.add-material-form input {
+    min-width: 180px;
+    padding: 8px 2px;
+    font-size: 14px;
+    color: var(--text-main);
+
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+}
+
+.add-material-form input::placeholder {
+    color: var(--text-muted);
+}
+
+.add-material-form input:focus {
+    outline: none;
+    border-bottom-color: var(--blue);
+}
+
+.add-material-form button {
+    padding: 8px 18px;
+    background: var(--blue);
+    color: white;
+    font-weight: 600;
+
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-material-form button:hover {
+    background: var(--blue-hover);
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -231,11 +331,17 @@ th {
     letter-spacing: 0.05em;
 }
 
-tr:hover { background: #f1f5f9; }
+tr:hover {
+    background: #f1f5f9;
+}
 
-.actions { display: flex; gap: 8px; }
+.actions {
+    display: flex;
+    gap: 8px;
+}
 
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
     padding: 8px 14px;
     border-radius: 6px;
     border: none;
@@ -245,92 +351,10 @@ tr:hover { background: #f1f5f9; }
     font-weight: 500;
 }
 
-.edit-btn { background: var(--blue); }
-.delete-btn { background: var(--red); }
-
-/* FORM CONTENEDOR */
-.add-material-form {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-
-    background: transparent;
-    border-radius: 8px;
-    overflow: hidden;
-    flex: 1;
-
-    padding: 20px;
-}
-
-/* INPUTS TOTALMENTE SUELTOS */
-.add-material-form input {
-    padding: 10px 2px;
-    font-size: 14px;
-    color: var(--text-main);
-
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border);
-
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.add-material-form input::placeholder {
-    color: var(--text-muted);
-}
-
-/* FOCO MINIMAL */
-.add-material-form input:focus {
-    outline: none;
-    border-bottom-color: var(--blue);
-    box-shadow: 0 2px 0 0 var(--blue);
-}
-
-/* BOTÓN */
-.add-material-form button {
-    align-self: flex-start;
-    margin-top: 10px;
-    padding: 8px 18px;
-
+.edit-btn {
     background: var(--blue);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-
-    transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.add-material-form button:hover {
-    background: var(--blue-hover);
-}
-
-.add-material-form button:active {
-    transform: scale(0.97);
-}
-
-/* HIDDEN (VISIBLE PARA TRANSICIÓN) */
-.add-material-form.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(10px);
-}
-
-.add-material-form {
-    transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.top-bar {
-    display: flex;
-    justify-content: flex-end; /* derecha */
-    align-items: flex-start;   /* arriba */
-    padding: 10px 20px;
-}
-
-.username {
-    font-weight: 600;
-    font-size: 14px;
+.delete-btn {
+    background: var(--red);
 }

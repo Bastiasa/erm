@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Dashboard</title>
+
     <link rel="stylesheet" href="/static/inv/dashboard.css?v=999">
     <script type="module" src="/static/js/refresh_token.js"></script>
 </head>
@@ -50,6 +51,7 @@
     </aside>
 
     <main class="main-content">
+
         <header class="header-top">
             <div class="page-title">
                 <h1>Inventory</h1>
@@ -70,9 +72,11 @@
                 <button type="submit">🔍</button>
             </form>
 
+            <!-- BOTÓN -->
             <button class="primary-btn" id="add-material-btn">➕ Add Material</button>
 
-            <form method="post" action="/inv/add" class="add-material-form hidden">
+            <!-- FORMULARIO (oculto por estado, no por display:none) -->
+            <form method="post" action="/inv/add" class="add-material-form">
                 <input type="text" name="item_name" placeholder="Nombre" required>
                 <input type="text" name="description" placeholder="Descripción" required>
                 <input type="number" name="quantity" placeholder="Cantidad inicial" required>
@@ -107,6 +111,7 @@
                 {% endfor %}
             </tbody>
         </table>
+
     </main>
 
     <script>
@@ -114,73 +119,80 @@
             document.getElementById('sidebar').classList.toggle('collapsed');
         }
 
-        const addBtn = document.getElementById('add-material-btn');
-        const addForm = document.querySelector('.add-material-form');
-        if (addBtn) {
-            addBtn.addEventListener('click', () => {
-                addForm.classList.toggle('hidden');
+        document.addEventListener("DOMContentLoaded", () => {
+            const addBtn = document.getElementById("add-material-btn");
+            const form = document.querySelector(".add-material-form");
+
+            if (!addBtn || !form) {
+                console.error("Botón o formulario no encontrado");
+                return;
+            }
+
+            addBtn.addEventListener("click", () => {
+                form.classList.toggle("active");
             });
-        }
 
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const row = btn.closest('tr');
-                const itemName = row.children[1].innerText.trim();
-                if (!confirm(`¿Estás seguro de que quieres eliminar "${itemName}"?`)) return;
+            // DELETE
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const row = btn.closest('tr');
+                    const itemName = row.children[1].innerText.trim();
 
-                const response = await fetch(`/inv/delete/${encodeURIComponent(itemName)}`, { method: 'POST' });
-                if (response.ok) location.reload();
-                else alert("Error al eliminar");
-            });
-        });
+                    if (!confirm(`¿Eliminar "${itemName}"?`)) return;
 
-
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const row = btn.closest('tr');
-                const originalOwnerId = row.children[0].innerText.trim(); // Guardamos el ID del dueño
-                const originalName = row.children[1].innerText.trim();
-                const originalDesc = row.children[2].innerText.trim();
-                const originalQty = row.children[3].innerText.trim();
-                const originalDate = row.children[5].innerText.trim();
-
-                row.innerHTML = `
-                <td>${originalOwnerId}</td>
-                <td><input type="text" id="edit-name" value="${originalName}" style="width:100%; padding:5px; border-radius:4px; border:1px solid #ccc;"></td>
-                <td><input type="text" id="edit-desc" value="${originalDesc}" style="width:100%; padding:5px; border-radius:4px; border:1px solid #ccc;"></td>
-                <td><input type="number" id="edit-qty" value="${originalQty}" style="width:100%; padding:5px; border-radius:4px; border:1px solid #ccc;"></td>
-                <td class="actions">
-                    <button type="button" class="save-btn" style="background: #28a745; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">💾 Guardar</button>
-                    <button type="button" class="cancel-edit" style="background: #dc3545; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">❌ Cancelar</button>
-                </td>
-                <td>${originalDate}</td>
-            `;
-
-                row.querySelector('.save-btn').addEventListener('click', async () => {
-                    const params = new URLSearchParams();
-                    params.append('item_name_new', document.getElementById('edit-name').value);
-                    params.append('description', document.getElementById('edit-desc').value);
-                    params.append('quantity', document.getElementById('edit-qty').value);
-
-                    const response = await fetch(`/inv/edit/${encodeURIComponent(originalName)}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: params
+                    const response = await fetch(`/inv/delete/${encodeURIComponent(itemName)}`, {
+                        method: 'POST'
                     });
 
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        const error = await response.json();
-                        alert("Error: " + (error.detail || "No se pudo actualizar"));
-                    }
+                    if (response.ok) location.reload();
+                    else alert("Error al eliminar");
                 });
+            });
 
-                row.querySelector('.cancel-edit').addEventListener('click', () => location.reload());
+            // EDIT
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const row = btn.closest('tr');
+
+                    const originalOwner = row.children[0].innerText.trim();
+                    const originalName = row.children[1].innerText.trim();
+                    const originalDesc = row.children[2].innerText.trim();
+                    const originalQty = row.children[3].innerText.trim();
+                    const originalDate = row.children[5].innerText.trim();
+
+                    row.innerHTML = `
+                        <td>${originalOwner}</td>
+                        <td><input type="text" id="edit-name" value="${originalName}"></td>
+                        <td><input type="text" id="edit-desc" value="${originalDesc}"></td>
+                        <td><input type="number" id="edit-qty" value="${originalQty}"></td>
+                        <td class="actions">
+                            <button type="button" class="save-btn">💾 Guardar</button>
+                            <button type="button" class="cancel-edit">❌ Cancelar</button>
+                        </td>
+                        <td>${originalDate}</td>
+                    `;
+
+                    row.querySelector('.save-btn').addEventListener('click', async () => {
+                        const params = new URLSearchParams();
+                        params.append('item_name_new', document.getElementById('edit-name').value);
+                        params.append('description', document.getElementById('edit-desc').value);
+                        params.append('quantity', document.getElementById('edit-qty').value);
+
+                        const response = await fetch(`/inv/edit/${encodeURIComponent(originalName)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: params
+                        });
+
+                        if (response.ok) location.reload();
+                        else alert("No se pudo actualizar");
+                    });
+
+                    row.querySelector('.cancel-edit').addEventListener('click', () => location.reload());
+                });
             });
         });
     </script>
 
 </body>
-
 </html>
