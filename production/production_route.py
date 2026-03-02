@@ -1,27 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import RedirectResponse
 from production.production_model import Production
 from sqlalchemy.orm import Session
-from core.dependencies import CreateSession
-from core.security import verify_token, create_token
-from production.production_schema import query_production, create_production
+from core.dependencies import CreateSession, templates
+from core.security import verify_token
+from production.production_schema import create_production
+from users.users_model import User
 
 
 production_router = APIRouter(prefix="/production", tags=["production"])
-
-@production_router.get("/", response_model=list[query_production])
-def show_production_by_client(client_name: str = Query(..., description="Client name"), session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
-    
-    production_projects = session.query(Production).filter(Production.client_name == client_name).all()
-
-    if not production_projects:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Not found projects to '{client_name}'"
-        )
-    
-    return production_projects
-
-
 
 @production_router.post("/add")
 def create_project_in_production(production: create_production, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
@@ -51,7 +38,17 @@ def create_project_in_production(production: create_production, session: Session
     if not new_production_item:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create production item, check the data provided")
 
-    return {
-        "message": "Production item created successfully",
-        "item": new_production_item
-    }
+    return RedirectResponse(url="/production/add1", status_code=303)
+
+#VIEWS
+
+@production_router.get("/")
+def show_production_by_client(request: Request, user: User, session: Session = Depends(CreateSession)):
+    
+    return templates.TemplateResponse(
+        "production/production.html",
+        {
+            "request": request,
+            "user": user
+        }
+    )
