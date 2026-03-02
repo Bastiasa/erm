@@ -9,8 +9,7 @@ from production.production_schema import query_production, create_production
 production_router = APIRouter(prefix="/production", tags=["production"])
 
 @production_router.get("/", response_model=list[query_production])
-def show_production_by_client(client_name: str = Query(..., description="Client name"), session: Session = Depends(CreateSession), user: str = Depends(verify_token)
-):
+def show_production_by_client(client_name: str = Query(..., description="Client name"), session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
     
     production_projects = session.query(Production).filter(Production.client_name == client_name).all()
 
@@ -26,9 +25,8 @@ def show_production_by_client(client_name: str = Query(..., description="Client 
 
 @production_router.post("/add")
 def create_project_in_production(production: create_production, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
-    access_token = create_token(user.id)
 
-    if not access_token:
+    if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
     
     new_production_item = Production(

@@ -26,7 +26,9 @@ body {
     min-height: 100vh;
 }
 
-/* --- SIDEBAR DINÁMICO --- */
+/* =========================
+   SIDEBAR
+========================= */
 .sidebar {
     width: var(--sidebar-width);
     background: #fff;
@@ -35,26 +37,22 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: width 0.3s ease; /* Transición suave para el ancho */
+    transition: width 0.3s ease;
     z-index: 1000;
 }
 
-/* ESTADO COLAPSADO: Reducimos el ancho físicamente */
 .sidebar.collapsed {
     width: var(--sidebar-collapsed) !important;
 }
 
-/* Header: El botón ☰ se mueve del lado derecho al centro */
 .sidebar-header {
     height: 70px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Abierto: Logo izquierda, Botón derecha */
+    justify-content: space-between;
     padding: 0 15px;
-    transition: all 0.3s ease;
 }
 
-/* Cuando el sidebar está colapsado, centramos el botón */
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
     padding: 0;
@@ -62,11 +60,8 @@ body {
 
 .app-icon {
     font-size: 24px;
-    display: flex;
-    align-items: center;
 }
 
-/* Ocultamos el logo al colapsar */
 .sidebar.collapsed .app-icon {
     display: none;
 }
@@ -77,14 +72,11 @@ body {
     font-size: 22px;
     cursor: pointer;
     color: var(--text-muted);
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
 }
 
-/* --- NAVEGACIÓN --- */
+/* =========================
+   NAV
+========================= */
 .sidebar-nav {
     padding: 10px 12px;
     flex: 1;
@@ -98,8 +90,6 @@ body {
     color: var(--text-muted);
     text-decoration: none;
     border-radius: 8px;
-    margin-bottom: 4px;
-    transition: all 0.2s ease;
 }
 
 .nav-item:hover,
@@ -109,210 +99,166 @@ body {
 }
 
 .nav-item .icon {
-    width: 24px; 
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
+    width: 24px;
+    text-align: center;
 }
 
-/* Ocultamos las etiquetas de texto al colapsar */
 .sidebar.collapsed .nav-item .label {
     display: none;
 }
 
-/* --- FOOTER Y SIGN OUT --- */
+/* =========================
+   FOOTER
+========================= */
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid var(--border);
-    margin-top: auto;
 }
 
 .logout-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     color: var(--red);
     text-decoration: none;
-    padding: 10px;
-    border-radius: 6px;
-    font-weight: 500;
 }
 
-/* Ocultamos el texto de Sign Out al colapsar */
-.sidebar.collapsed .logout-link .label,
-.sidebar.collapsed .logout-link span:not(.icon) {
-    display: none;
-}
-
-.logout-link:hover {
-    background: #ffeeee;
-}
-
-/* --- CONTENIDO PRINCIPAL DINÁMICO --- */
+/* =========================
+   MAIN CONTENT
+========================= */
 .main-content {
-    margin-left: var(--sidebar-width); /* Margen inicial */
+    margin-left: var(--sidebar-width);
     padding: 40px;
     flex: 1;
     background: var(--bg-page);
-    transition: margin-left 0.3s ease; /* Transición suave para el margen */
+    transition: margin-left 0.3s ease;
 }
 
-/* Cuando el sidebar de al lado se colapsa, el margen disminuye */
 .sidebar.collapsed + .main-content {
-    margin-left: var(--sidebar-collapsed) !important;
+    margin-left: var(--sidebar-collapsed);
 }
 
-/* --- ESTILOS DE TABLA Y CONTROLES --- */
-.header-top { margin-bottom: 32px; }
-.header-top h1 { font-size: 2rem; margin-bottom: 4px; }
-.header-top p { color: var(--text-muted); }
-
-.controls {
+/* =========================
+   PAGE HEADER (TÍTULO + BOTÓN)
+========================= */
+.page-header {
     display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-.search-form {
-    display: flex;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    flex: 1;
+.page-header h1 {
+    font-size: 2rem;
 }
 
-.search-form input {
-    flex: 1;
-    border: none;
-    padding: 12px;
-    outline: none;
-}
-
-.search-form button {
+/* =========================
+   ADD BUTTON
+========================= */
+.add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
     background: var(--blue);
     color: white;
     border: none;
-    padding: 0 20px;
-    cursor: pointer;
-}
-
-.primary-btn {
-    background: var(--blue);
-    color: white;
-    border: none;
-    padding: 12px 20px;
     border-radius: 8px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
+.add-btn:hover {
+    background: var(--blue-hover);
 }
 
-th, td {
-    padding: 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-}
-
-th {
-    background: #f8fafc;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-tr:hover { background: #f1f5f9; }
-
-.actions { display: flex; gap: 8px; }
-
-.edit-btn, .delete-btn {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.edit-btn { background: var(--blue); }
-.delete-btn { background: var(--red); }
-
-.hidden { display: none; }
 /* =========================
-   CONTACTS FILTER FORM
+   ADD CONTACT FORM
 ========================= */
-.main-content form {
+.add-contact-form {
+    margin-bottom: 24px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+}
+
+.add-contact-form.hidden {
+    display: none;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.form-row input,
+.form-row select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+/* =========================
+   FILTER FORM
+========================= */
+.main-content form:not(.add-contact-form) {
     display: flex;
     gap: 16px;
     align-items: center;
-    margin: 24px 0;
+    margin-bottom: 24px;
 }
 
-/* INPUT + SELECT */
 .main-content form input,
 .main-content form select {
     min-width: 220px;
     padding: 10px 4px;
-    font-size: 14px;
-    color: var(--text-main);
-
-    background: transparent;
     border: none;
     border-bottom: 1px solid var(--border);
-
-    transition: border-color 0.2s ease;
+    background: transparent;
 }
 
-/* Placeholder */
-.main-content form input::placeholder {
-    color: var(--text-muted);
-}
-
-/* Focus */
-.main-content form input:focus,
-.main-content form select:focus {
-    outline: none;
-    border-bottom-color: var(--blue);
-}
-
-/* SELECT limpio (sin estilos feos del browser) */
-.main-content form select {
-    appearance: none;
-    background-image: 
-        linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
-        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
-    background-position:
-        calc(100% - 14px) 55%,
-        calc(100% - 8px) 55%;
-    background-size: 6px 6px, 6px 6px;
-    background-repeat: no-repeat;
-    padding-right: 28px;
-    cursor: pointer;
-}
-
-/* BOTÓN */
 .main-content form button {
     padding: 10px 22px;
     background: var(--blue);
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
 }
 
-.main-content form button:hover {
-    background: var(--blue-hover);
+/* =========================
+   TABLE
+========================= */
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th {
+    background: #f8fafc;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+tr:hover {
+    background: #f1f5f9;
+}
+
+thead, tbody, tr {
+    width: 100%;
+}
+
+th, td {
+    box-sizing: border-box;
+    text-align: left;
+    padding: 16px;
+    border-bottom: 1px solid var(--border)
 }

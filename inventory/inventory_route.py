@@ -32,8 +32,7 @@ def delete_inventory_item_route(item_name: str, session: Session = Depends(Creat
 
 
 @inventory_router.get("/dashboard")
-def inventory_dashboard(request: Request, search: str = None, session: Session = Depends(CreateSession), user: User = Depends(verify_token)
-):
+def inventory_dashboard(request: Request, search: str = None, session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
     query = session.query(Inventory)
 
     if search:

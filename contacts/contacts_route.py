@@ -1,26 +1,26 @@
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from core.dependencies import CreateSession, templates
+from core.security import verify_token
 from contacts.contacts_models import Contacts
-from contacts.contacts_services import build_query
-from core.dependencies import CreateSession
-from core.dependencies import templates
+from contacts.contacts_services import CreateContact
+from contacts.contacts_schema import ContactsBase
+from users.users_model import User
 
 contacts_router = APIRouter(prefix="/ctc", tags=["ctc"])
 
 @contacts_router.post("/add")
-def create_contact(name: str = Form(...), email: str = Form(...), phone: str = Form(...), contact_type: str = Form(...), address: str = Form(...), session: Session = Depends(CreateSession)):
-    contact = Contacts(
+def create_contact(name: str = Form(...), email: str | None = Form(None), phone: str = Form(...), type: str = Form(...), user: User = Depends(verify_token), session: Session = Depends(CreateSession)):
+    
+    contact = ContactsBase( #esto empaqueta todo el schema dentro de una variable para poder pasarle un unico argumento a la funcion de createcontact
         name=name,
         email=email,
         phone=phone,
-        contact_type=contact_type,
-        address=address
-    )
+        type=type
+    )  
 
-    session.add(contact)
-    session.commit()
-
+    CreateContact(contact, user, session)
     return RedirectResponse(url="/ctc", status_code=303)
 
 
@@ -29,15 +29,18 @@ def create_contact(name: str = Form(...), email: str = Form(...), phone: str = F
 #VIEWS
 
 @contacts_router.get("/")
-def get_contacts(request: Request, query: str | None = None, contact_type: str | None = None, session: Session = Depends(CreateSession)):
-    contacts = build_query(session, query, contact_type).all()
+def get_contacts(request: Request, session: Session = Depends(CreateSession)):
+    contacts =  session.query(Contacts).all()
 
     return templates.TemplateResponse(
         "contacts/contacts.html",
         {
             "request": request,
             "contacts": contacts,
-            "query": query,
-            "contact_type": contact_type
         }
     )
+
+@contacts_router.get("/add")
+def CreateContact_router(ctccreate: ContactsBase, user: User = Depends(verify_token), session: Session = Depends(CreateSession), name: str = Form(), email: str = Form(), phone: int = Form(), type: str = Form()):
+    CreateContact(user, session, name, email, phone, type)
+    return RedirectResponse(url="/ctc/contacts", status_code=303)
