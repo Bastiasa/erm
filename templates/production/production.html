@@ -14,7 +14,7 @@
 
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="app-icon">🏭</div>
+            <div class="app-icon">🥵🥵🥵🥵🥵</div>
             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         </div>
 
@@ -99,64 +99,48 @@
                 </tr>
             </thead>
             <tbody id="production-table-body">
-                <!-- JS llenará esto -->
+                {% for production in productions %}
+                <tr data-item-id="{{ item.id }}">
+                    <td>{{ productions.project_name }}</td>
+                    <td>{{ productions.client_name }}</td>
+                    <td>{{ productions.description }}</td>
+                    <td>{{ productions.status }}</td>
+                    <td>{{ productions.delivery_date }}</td>
+                    <td class="actions">
+                        <button class="edit-btn" data-item-id="{{ item.id }}">✏️ Edit</button>
+                        <button class="delete-btn" data-item-id="{{ item.id }}">🗑️ Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
 
     </main>
 
     <script>
+        // Sidebar
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById("sidebar").classList.toggle("collapsed");
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+
             const addBtn = document.getElementById("add-production-btn");
             const form = document.getElementById("production-form");
             const tableBody = document.getElementById("production-table-body");
 
-            addBtn.addEventListener("click", () => form.classList.toggle("active"));
+            // Mostrar / ocultar formulario
+            addBtn.addEventListener("click", () => {
+                form.classList.toggle("active");
+            });
 
+            // Obtener token
             function getToken() {
                 return localStorage.getItem("access_token");
             }
 
-            async function searchProduction() {
-                const clientName = document.getElementById("searchClient").value.trim();
-                tableBody.innerHTML = "";
-
-                if (!clientName) return;
-
-                try {
-                    const res = await fetch(`/production/?client_name=${encodeURIComponent(clientName)}`, {
-                        headers: { "Authorization": `Bearer ${getToken()}` }
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        alert(data.detail || "Error fetching data");
-                        return;
-                    }
-
-                    data.forEach(item => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td>${item.project_name}</td>
-                            <td>${item.client_name}</td>
-                            <td>${item.description}</td>
-                            <td>${item.status}</td>
-                            <td>${item.delivery_date}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
-
-                } catch (err) {
-                    alert("Server connection error");
-                }
-            }
-
-            async function createProduction(event) {
+            // Crear producción
+            form.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
                 const payload = {
@@ -187,23 +171,57 @@
                     alert("Production created successfully!");
                     form.reset();
                     form.classList.remove("active");
-                    searchProduction();
 
-                } catch (err) {
+                } catch {
                     alert("Server error");
                 }
-            }
+            });
 
-            form.addEventListener("submit", createProduction);
+            // Buscar producción (EXACTAMENTE UNA FUNCIÓN)
+            window.searchProduction = async function () {
+                const clientName = document.getElementById("searchClient").value.trim();
+                tableBody.innerHTML = "";
 
-            // Inicialmente no cargamos nada
+                if (!clientName) return;
+
+                try {
+                    const res = await fetch(
+                        `/production/?client_name=${encodeURIComponent(clientName)}`,
+                        {
+                            headers: {
+                                "Authorization": `Bearer ${getToken()}`
+                            }
+                        }
+                    );
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        alert(data.detail || "Error fetching data");
+                        return;
+                    }
+
+                    // El backend manda la lista
+                    data.forEach(item => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                        <td>${item.project_name}</td>
+                        <td>${item.client_name}</td>
+                        <td>${item.description}</td>
+                        <td>${item.status}</td>
+                        <td>${item.delivery_date}</td>
+                    `;
+                        tableBody.appendChild(row);
+                    });
+
+                } catch {
+                    alert("Server connection error");
+                }
+            };
+
         });
-
-        // Exponer searchProduction globalmente para el formulario
-        function searchProduction() {
-            document.querySelector("#production-form").dispatchEvent(new Event('searchProduction'));
-        }
     </script>
 
 </body>
+
 </html>

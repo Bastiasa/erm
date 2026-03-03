@@ -11,12 +11,6 @@ class production_schema(BaseModel):
     class Config:
         from_attributes = True
 
-class query_production(BaseModel):
-    client_name: str = Field(..., max_length=255)
-
-    class Config:
-        from_attributes = True
-
 class create_production(BaseModel):
     client_name: str = Field(..., max_length=255)
     project_name: str = Field(..., max_length=255)

@@ -1,25 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from production.production_model import Production
 from sqlalchemy.orm import Session
-from core.dependencies import CreateSession
-from core.security import verify_token, create_token
-from production.production_schema import query_production, create_production
+from core.dependencies import CreateSession, templates 
+from core.security import verify_token 
+from production.production_schema import create_production
 
 
 production_router = APIRouter(prefix="/production", tags=["production"])
 
-@production_router.get("/", response_model=list[query_production])
-def show_production_by_client(client_name: str = Query(..., description="Client name"), session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
-    
-    production_projects = session.query(Production).filter(Production.client_name == client_name).all()
+@production_router.get("/")
+def show_production_by_client(request: Request, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
 
-    if not production_projects:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Not found projects to '{client_name}'"
-        )
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
     
-    return production_projects
+    production_projects = session.query(Production).all()
+    
+    return templates.TemplateResponse(
+        "production/production.html",
+        {   
+            "user": user,
+            "request": request,
+            "production_projects": production_projects,
+        }
+    )
 
 
 

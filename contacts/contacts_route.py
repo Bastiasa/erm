@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends, Request, Form, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from core.dependencies import CreateSession, templates
@@ -29,7 +29,11 @@ def create_contact(name: str = Form(...), email: str | None = Form(None), phone:
 #VIEWS
 
 @contacts_router.get("/")
-def get_contacts(request: Request, session: Session = Depends(CreateSession)):
+def get_contacts(request: Request, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
+    
     contacts =  session.query(Contacts).all()
 
     return templates.TemplateResponse(
@@ -41,6 +45,6 @@ def get_contacts(request: Request, session: Session = Depends(CreateSession)):
     )
 
 @contacts_router.get("/add")
-def CreateContact_router(ctccreate: ContactsBase, user: User = Depends(verify_token), session: Session = Depends(CreateSession), name: str = Form(), email: str = Form(), phone: int = Form(), type: str = Form()):
+def CreateContact_router(user: User = Depends(verify_token), session: Session = Depends(CreateSession), name: str = Form(), email: str = Form(), phone: int = Form(), type: str = Form()):
     CreateContact(user, session, name, email, phone, type)
     return RedirectResponse(url="/ctc/contacts", status_code=303)
