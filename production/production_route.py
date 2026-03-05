@@ -1,34 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import RedirectResponse
 from production.production_model import Production
 from sqlalchemy.orm import Session
 from core.dependencies import CreateSession, templates 
 from core.security import verify_token 
 from production.production_schema import create_production
+from users.users_model import User
 
 
 production_router = APIRouter(prefix="/production", tags=["production"])
 
-@production_router.get("/")
-def show_production_by_client(request: Request, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
-
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
-    
-    production_projects = session.query(Production).all()
-    
-    return templates.TemplateResponse(
-        "production/production.html",
-        {   
-            "user": user,
-            "request": request,
-            "production_projects": production_projects,
-        }
-    )
-
-
-
 @production_router.post("/add")
-def create_project_in_production(production: create_production, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
+def create_project_in_production(production: create_production, session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
@@ -44,18 +27,70 @@ def create_project_in_production(production: create_production, session: Session
     if session.query(Production).filter(Production.project_name == new_production_item.project_name, Production.client_name == new_production_item.client_name).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This production item already exists, please provide different data to create a new production item")
         
-
-    if not new_production_item.project_name or not new_production_item.client_name or not new_production_item.description:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please, check the data provided, all fields are required to create a production item")
-
     session.add(new_production_item)
     session.commit()
     session.refresh(new_production_item)
-
-    if not new_production_item:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create production item, check the data provided")
 
     return {
         "message": "Production item created successfully",
         "item": new_production_item
     }
+
+@production_router.post("/delete/{production_name}")
+def delete_project_route(project_name: str, session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="User not authenticated")
+
+    project_to_delete = session.query(Production).filter(Production.project_name == project_name).first()
+
+    if not project_to_delete:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    session.delete(project_to_delete)
+    session.commit()
+
+    return {
+        "message": "Project deleted successfully",
+        "Project": project_to_delete
+    }
+
+
+# VIEWS
+
+
+@production_router.get("/")
+def show_production_by_client(request: Request, session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
+    
+    production_projects = session.query(Production).all()
+    
+    return templates.TemplateResponse(
+        "production/production.html",
+        {   
+            "user": user,
+            "request": request,
+            "production_projects": production_projects,
+        }
+    )
+
+@production_router.get("/delete/{production_id}")
+def delete_project_get(production_id: int, session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Unauthorized")
+
+    project = session.query(Production).filter(Production.id == production_id).first()
+
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Project not found")
+
+    session.delete(project)
+    session.commit()
+
+    # Redirigir a la vista principal
+    return RedirectResponse(
+        url="/production",
+        status_code=status.HTTP_303_SEE_OTHER
+    )

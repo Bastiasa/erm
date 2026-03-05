@@ -21,6 +21,7 @@ def create_contact(name: str = Form(...), email: str | None = Form(None), phone:
     )  
 
     CreateContact(contact, user, session)
+    
     return RedirectResponse(url="/ctc", status_code=303)
 
 
@@ -29,7 +30,7 @@ def create_contact(name: str = Form(...), email: str | None = Form(None), phone:
 #VIEWS
 
 @contacts_router.get("/")
-def get_contacts(request: Request, session: Session = Depends(CreateSession), user: str = Depends(verify_token)):
+def get_contacts(request: Request, session: Session = Depends(CreateSession), user: User = Depends(verify_token)):
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized, invalid token")
@@ -45,6 +46,6 @@ def get_contacts(request: Request, session: Session = Depends(CreateSession), us
     )
 
 @contacts_router.get("/add")
-def CreateContact_router(user: User = Depends(verify_token), session: Session = Depends(CreateSession), name: str = Form(), email: str = Form(), phone: int = Form(), type: str = Form()):
+def CreateContact_router(user: User = Depends(verify_token), session: Session = Depends(CreateSession), name: str = Form(), email: str = Form(), phone: str = Form(), type: str = Form()):
     CreateContact(user, session, name, email, phone, type)
     return RedirectResponse(url="/ctc/contacts", status_code=303)
