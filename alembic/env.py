@@ -11,11 +11,13 @@ from users import users_model
 from inventory import inventory_model
 from production import production_model
 
+from core.config import DATABASE_URL
+
 config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    os.getenv("DATABASE_URL")
+    DATABASE_URL
 )
 
 if config.config_file_name is not None:
