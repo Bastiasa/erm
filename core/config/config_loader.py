@@ -31,7 +31,7 @@ def parse_property(property:str, parser:Callable[[str|None], ParseConfigResult])
     
     property.removeprefix('.')
 
-    value = eval(f'RAW_CONFIG.{property}')
+    value = eval(f'RAW_CONFIG.{property}') #esta linea
     success, error, result = parser(value)
 
     if not success:

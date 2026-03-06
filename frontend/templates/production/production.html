@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Production Dashboard</title>
 
-    <link rel="stylesheet" href="/static/inv/dashboard.css?v=999">
+    <link rel="stylesheet" href="/static/production/production.css">
     <script type="module" src="/static/js/refresh_token.js"></script>
 </head>
 
@@ -96,19 +96,22 @@
                     <th>Description</th>
                     <th>Status</th>
                     <th>Delivery Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="production-table-body">
-                {% for production in productions %}
-                <tr data-item-id="{{ item.id }}">
-                    <td>{{ productions.project_name }}</td>
-                    <td>{{ productions.client_name }}</td>
-                    <td>{{ productions.description }}</td>
-                    <td>{{ productions.status }}</td>
-                    <td>{{ productions.delivery_date }}</td>
+                {% for production in production_projects %}
+                <tr data-item-id="{{ production.id }}">
+                    <td>{{ production.project_name }}</td>
+                    <td>{{ production.client_name }}</td>
+                    <td>{{ production.description }}</td>
+                    <td>{{ production.status }}</td>
+                    <td>{{ production.delivery_date }}</td>
                     <td class="actions">
-                        <button class="edit-btn" data-item-id="{{ item.id }}">✏️ Edit</button>
-                        <button class="delete-btn" data-item-id="{{ item.id }}">🗑️ Delete</button>
+                        <button class="edit-btn" data-item-id="{{ production.id }}">✏️ Edit</button>
+                        <button class="delete-btn" data-item-id="{{ production.id }}"><a
+                                href="/production/delete/{{ production.id }}" class="delete-btn"
+                                onclick="return confirm('¿Eliminar este proyecto?')">🗑️ Delete</a></button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -118,28 +121,86 @@
     </main>
 
     <script>
-        // Sidebar
-        function toggleSidebar() {
-            document.getElementById("sidebar").classList.toggle("collapsed");
-        }
-
         document.addEventListener("DOMContentLoaded", () => {
 
             const addBtn = document.getElementById("add-production-btn");
             const form = document.getElementById("production-form");
             const tableBody = document.getElementById("production-table-body");
 
-            // Mostrar / ocultar formulario
-            addBtn.addEventListener("click", () => {
-                form.classList.toggle("active");
-            });
-
-            // Obtener token
+            // ===============================
+            // TOKEN
+            // ===============================
             function getToken() {
                 return localStorage.getItem("access_token");
             }
 
-            // Crear producción
+            // ===============================
+            // SIDEBAR
+            // ===============================
+            window.toggleSidebar = function () {
+                document.getElementById("sidebar").classList.toggle("collapsed");
+            };
+
+            // ===============================
+            // TOGGLE FORM
+            // ===============================
+            addBtn.addEventListener("click", () => {
+                form.classList.toggle("active");
+            });
+
+            // ===============================
+            // CREAR FILA
+            // ===============================
+            function createRow(item) {
+                const row = document.createElement("tr");
+                row.dataset.itemId = item.id;
+
+                row.innerHTML = `
+            <td>${item.project_name}</td>
+            <td>${item.client_name}</td>
+            <td>${item.description}</td>
+            <td>${item.status}</td>
+            <td>${item.delivery_date}</td>
+            <td class="actions">
+                <button class="edit-btn">✏️ Edit</button>
+                <button class="delete-btn">🗑️ Delete</button>
+            </td>
+        `;
+
+                // DELETE CON JS (usa tu backend TAL CUAL)
+                row.querySelector(".delete-btn").addEventListener("click", async () => {
+                    if (!confirm("¿Eliminar este proyecto?")) return;
+
+                    try {
+                        const res = await fetch(
+                            `/production/delete/${encodeURIComponent(item.project_name)}`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Authorization": `Bearer ${getToken()}`
+                                }
+                            }
+                        );
+
+                        if (!res.ok) {
+                            const err = await res.json();
+                            alert(err.detail || "Error deleting project");
+                            return;
+                        }
+
+                        row.remove();
+
+                    } catch {
+                        alert("Server connection error");
+                    }
+                });
+
+                return row;
+            }
+
+            // ===============================
+            // CREATE PRODUCTION
+            // ===============================
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
@@ -168,56 +229,17 @@
                         return;
                     }
 
-                    alert("Production created successfully!");
+                    // 👇 USAMOS DIRECTAMENTE LO QUE DEVUELVE EL BACKEND
+                    const newRow = createRow(data.item);
+                    tableBody.prepend(newRow);
+
                     form.reset();
                     form.classList.remove("active");
 
                 } catch {
-                    alert("Server error");
-                }
-            });
-
-            // Buscar producción (EXACTAMENTE UNA FUNCIÓN)
-            window.searchProduction = async function () {
-                const clientName = document.getElementById("searchClient").value.trim();
-                tableBody.innerHTML = "";
-
-                if (!clientName) return;
-
-                try {
-                    const res = await fetch(
-                        `/production/?client_name=${encodeURIComponent(clientName)}`,
-                        {
-                            headers: {
-                                "Authorization": `Bearer ${getToken()}`
-                            }
-                        }
-                    );
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        alert(data.detail || "Error fetching data");
-                        return;
-                    }
-
-                    // El backend manda la lista
-                    data.forEach(item => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                        <td>${item.project_name}</td>
-                        <td>${item.client_name}</td>
-                        <td>${item.description}</td>
-                        <td>${item.status}</td>
-                        <td>${item.delivery_date}</td>
-                    `;
-                        tableBody.appendChild(row);
-                    });
-
-                } catch {
                     alert("Server connection error");
                 }
-            };
+            });
 
         });
     </script>
