@@ -8,7 +8,6 @@ from contacts.contacts_route import contacts_router
 from core.database import base, engine
 from core.dependencies import templates
 
-
 app = FastAPI()
 
 base.metadata.create_all(bind=engine)
@@ -21,6 +20,7 @@ def home(request: Request):
     "home/base.html",
     {"request": request, "name": ""}
     )
+
 
 app.include_router(home_router)
 app.include_router(inventory_router)
