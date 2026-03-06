@@ -1,0 +1,25 @@
+jwt:
+  secret_key: your-super-mega-secret-key-change-this-in-production
+  algorithm: HS256
+
+  expiration:
+    access_token: 30 # Minutes
+    refresh_token: 1440 # Minutes
+  
+email_verification:
+
+  from_name: ERM Support
+
+  username: your-email@gmail.com
+  password: your-app-password
+
+  token_expiration: 60 # Minutes
+
+  server:
+    port: 587
+    host: smtp.gmail.com
+    tls: true
+    ssl: false
+  
+database:
+  url: postgresql://user:password@localhost:5432/erm_db
