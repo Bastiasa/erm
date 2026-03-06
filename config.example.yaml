@@ -8,12 +8,16 @@ jwt:
   
 email_verification:
 
-  from_name: ERM Support
-
   username: your-email@gmail.com
   password: your-app-password
 
+  from_data: 
+    name: ERM Support
+    mail: your-email@gmail.com
+
   token_expiration: 60 # Minutes
+  
+  use_credentials: true
 
   server:
     port: 587
