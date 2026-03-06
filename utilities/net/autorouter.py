@@ -12,6 +12,7 @@ def use_autorouter(
         prefix:str = "",
         exclude:list[str]=[]
     ):
+    
     """
     Creates an automatic router that serves HTML templates based on the requested path.
 
